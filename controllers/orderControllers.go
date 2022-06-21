@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm/clause"
 )
 
 func GetOrders(c *gin.Context) {
@@ -91,9 +92,11 @@ func DeleteOrder(c *gin.Context) {
 	db := database.GetDB()
 
 	order := models.Order{}
+	item := models.Item{OrderID: c.Param("id")}
 
+	db.Delete(item)
 
-	err := db.Select("Items").Where("id = ?", c.Param("id")).Delete(&order).Error
+	err := db.Select(clause.Associations).Where("id = ?", c.Param("id")).Delete(&order).Error
 
 	if err != nil {
 		fmt.Println("Error Delete order data", err)

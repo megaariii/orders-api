@@ -28,6 +28,8 @@ func StartDB() {
 	}
 
 	db.Debug().AutoMigrate(models.Item{}, models.Order{})
+
+	db.Debug().Migrator().CreateConstraint(models.Order{}, "Items")
 }
 
 func GetDB() *gorm.DB {
