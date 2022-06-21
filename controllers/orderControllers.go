@@ -13,7 +13,7 @@ import (
 func GetOrders(c *gin.Context) {
 	order := []models.Order{}
 	db := database.GetDB()
-	err := db.Find(&order).Error
+	err := db.Preload("Items").Find(&order).Error
 
 	if err != nil {
 		fmt.Println("Error getting order data", err.Error())
@@ -48,6 +48,7 @@ func CreateOrder(c *gin.Context) {
 
 	c.BindJSON(&newOrder)
 	err := db.Create(&newOrder).Error
+	db.Preload("Items").Find(&newOrder)
 
 	if err != nil {
 		fmt.Println("Error creating order", err)
@@ -70,6 +71,7 @@ func UpdateOrder(c *gin.Context) {
 	var result gin.H
 
 	err := db.Where("id = ?", c.Param("id")).First(&newOrder).Error
+	db.Preload("Items").Find(&newOrder)
 	c.BindJSON(&newOrder)
 	db.Save(&newOrder)
 
@@ -90,14 +92,15 @@ func DeleteOrder(c *gin.Context) {
 
 	order := models.Order{}
 
-	err := db.Where("id = ?", c.Param("id")).Delete(&order).Error
+
+	err := db.Select("Items").Where("id = ?", c.Param("id")).Delete(&order).Error
 
 	if err != nil {
 		fmt.Println("Error Delete order data", err)
 		return
 	}
 
-	result := "Order Deleted"
+	result := "Order Data Deleted"
 
 	c.JSON(http.StatusOK, result)
 }
